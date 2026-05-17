@@ -1,22 +1,33 @@
-import transformers as tr
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from transformers.utils import configure_http_backend
 import streamlit as st
-import httpx
+
+st.write("Welcome to DocSnipped! This is a simple app that allows you to generate snippets from your documents using a language model. " \
+"Please upload your document and click the button to generate snippets.")
+
+options = ("Select an Option","Paste Text", "Upload Document")
+choice =st.selectbox("Will you be pasting the text snippet or uploading a document?", options)
+choice_index = options.index(choice)
+
+if choice_index == 1:
+    if st.button("Paste Text"):
+        st.write("Please paste your text snippet in the text area below and click the button to generate snippets.")
+        text_snippet = st.text_area("Paste your text snippet here:")
+        if st.button("Generate Summary from Text"):
+            st.write("Generating summary...")
+            # Here you would add the code to process the text snippet and generate a summary using the language model.
+            # For example, you could use a pre-trained model to generate a summary from the pasted text.
+            st.write("Summary generated successfully! Here is your generated summary:")
+            # Display the generated summary here.
+
+elif choice_index == 2:
+    doc = st.file_uploader("Upload your document here (Please, text files only)", type=["pdf", "docx", "txt"])
+    if doc is not None:
+        st.write("Document uploaded successfully! Now, click the button below to generate snippets.")
+        if st.button("Generate Document Summary"):
+            st.write("Generating summary...")
+            # Here you would add the code to process the document and generate a summary using the language model.
+            # For example, you could read the document, extract text, and then use a pre-trained model to generate a summary.
+            st.write("Summary generated successfully! Here is your generated summary:")
+            # Display the generated summary here.
 
 
-configure_http_backend(backend_factory=lambda: httpx.Client())
-model = 'facebook/bart-large-cnn'
-token = AutoTokenizer.from_pretrained(model)
-model = AutoModelForCausalLM.from_pretrained(model)
-st.title("Class Summarizer")
-st.write("Enter the class description and the class name to get a summary of the class.")
-class_name = st.text_input("Class Name")
-class_description = st.text_area("Class Description")
-if st.button("Summarize"):
-    input_text = f"Class Name: {class_name}\nClass Description: {class_description}\nSummary:"
-    inputs = token(input_text, return_tensors="pt")
-    outputs = model.generate(**inputs, max_length=100)
-    summary = token.decode(outputs[0], skip_special_tokens=True)
-    st.write("Summary:")
-    st.write(summary)
+else:    st.write("Please select an option to either paste text or upload a document to generate snippets.")
