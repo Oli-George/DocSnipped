@@ -1,8 +1,11 @@
 import transformers as tr
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers.utils import configure_http_backend
 import streamlit as st
-import torch
+import httpx
 
+
+configure_http_backend(backend_factory=lambda: httpx.Client())
 model = 'facebook/bart-large-cnn'
 token = AutoTokenizer.from_pretrained(model)
 model = AutoModelForCausalLM.from_pretrained(model)
