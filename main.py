@@ -1,4 +1,11 @@
 import streamlit as st
+
+def TextInference(snippet):
+    pass
+
+def DocInference(document):
+    pass
+
 def main():
     st.write("Welcome to DocSnipped! This is a simple app that allows you to generate snippets from your documents using a language model. " \
     "Please upload your document and click the button to generate snippets.")
@@ -36,10 +43,8 @@ def main():
                 st.write(doc_summary)
 
 
-    else:    st.write("Please select an option to either paste text or upload a document to generate snippets.")
+    else:
+        st.write("Please select an option to either paste text or upload a document to generate snippets.")
 
-    def TextInference(snippet):
-        pass
-
-    def DocInference(document):
-        pass
+if __name__ == "__main__":
+    main()
