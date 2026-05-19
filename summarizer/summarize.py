@@ -1,7 +1,9 @@
+import streamlit as st
 from .extract import extract_text_from_file
 from .preprocess import chunk_text
 from .models import load_summarizer
 
+@st.cache_data
 def process_and_summarize_text(text: str) -> str:
     """
     Chunks the input text, summarizes each chunk, and concatenates the results.
@@ -13,7 +15,7 @@ def process_and_summarize_text(text: str) -> str:
     chunks = chunk_text(text, chunk_size=1500, chunk_overlap=150)
     
     # 2. Load model
-    tokenizer, model = load_summarizer()
+    tokenizer, model, device = load_summarizer()
     
     # 3. Summarize chunks
     summarized_chunks = []
@@ -22,7 +24,7 @@ def process_and_summarize_text(text: str) -> str:
         input_text = "summarize: " + chunk
         
         try:
-            inputs = tokenizer(input_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = tokenizer(input_text, return_tensors="pt", max_length=512, truncation=True).to(device)
             
             # approximate tokens as len(chunk) // 4
             input_length_approx = len(chunk) // 4

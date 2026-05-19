@@ -37,11 +37,10 @@ def main():
         text_snippet = st.text_area("Paste your text snippet here:")
         if st.button("Generate Summary from Text"):
             if text_snippet:
-                st.divider()
-                st.write("Generating summary...")
-                text_summary = TextInference(text_snippet)
-                st.session_state["summary"] = text_summary
-                st.session_state["source_text"] = text_snippet
+                with st.spinner("Generating summary..."):
+                    text_summary = TextInference(text_snippet)
+                    st.session_state["summary"] = text_summary
+                    st.session_state["source_text"] = text_snippet
             else:
                 st.warning("Please paste some text first.")
 
@@ -57,11 +56,10 @@ def main():
             st.write("Document uploaded successfully! Now, click the button below to generate a summary.")
             
             if st.button("Generate Document Summary"):
-                st.divider()
-                st.write("Generating summary...")
-                doc_summary, doc_text = DocInference(doc)
-                st.session_state["summary"] = doc_summary
-                st.session_state["source_text"] = doc_text
+                with st.spinner("Generating summary..."):
+                    doc_summary, doc_text = DocInference(doc)
+                    st.session_state["summary"] = doc_summary
+                    st.session_state["source_text"] = doc_text
 
     else:
         st.write("Please select an option to either paste text or upload a document to generate snippets.")
