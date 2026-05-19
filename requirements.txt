@@ -1,0 +1,7 @@
+streamlit
+spacy
+transformers
+torch
+pdfplumber
+python-docx
+langchain-text-splitters
