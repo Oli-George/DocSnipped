@@ -44,12 +44,13 @@ def process_and_summarize_text(text: str) -> str:
     final_summary = " ".join(summarized_chunks)
     return final_summary
 
-def process_and_summarize_doc(file_obj) -> str:
+def process_and_summarize_doc(file_obj) -> tuple[str, str]:
     """
     Extracts text from a document and summarizes it.
+    Returns a tuple of (summary, extracted_text).
     """
     # 1. Extract text from uploaded file
     text = extract_text_from_file(file_obj)
     
     # 2. Summarize
-    return process_and_summarize_text(text)
+    return process_and_summarize_text(text), text
