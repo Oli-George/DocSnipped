@@ -9,13 +9,15 @@ if "source_text" not in st.session_state:
     st.session_state["source_text"] = ""
 if "current_choice" not in st.session_state:
     st.session_state["current_choice"] = None
+if "max_words" not in st.session_state:
+    st.session_state["max_words"] = 150
 
-def TextInference(snippet):
-    return process_and_summarize_text(snippet)
+def TextInference(snippet, max_words):
+    return process_and_summarize_text(snippet, max_words=max_words)
 
-def DocInference(document):
+def DocInference(document, max_words):
     # process_and_summarize_doc returns (summary, text)
-    summary, text = process_and_summarize_doc(document)
+    summary, text = process_and_summarize_doc(document, max_words=max_words)
     return summary, text
 
 def main():
@@ -35,10 +37,21 @@ def main():
     if choice_index == 1:
         st.write("Please paste your text snippet in the text area below and click the button to generate snippets.")
         text_snippet = st.text_area("Paste your text snippet here:")
+
+        st.session_state["max_words"] = st.slider(
+            "Summary length (words)",
+            min_value=10,
+            max_value=500,
+            value=st.session_state["max_words"],
+            step=10,
+            help="Drag to set how long the generated summary should be (approximate word count).",
+            key="slider_text",
+        )
+
         if st.button("Generate Summary from Text"):
             if text_snippet:
                 with st.spinner("Generating summary..."):
-                    text_summary = TextInference(text_snippet)
+                    text_summary = TextInference(text_snippet, st.session_state["max_words"])
                     st.session_state["summary"] = text_summary
                     st.session_state["source_text"] = text_snippet
             else:
@@ -54,10 +67,20 @@ def main():
 
         if doc is not None:
             st.write("Document uploaded successfully! Now, click the button below to generate a summary.")
-            
+
+            st.session_state["max_words"] = st.slider(
+                "Summary length (words)",
+                min_value=10,
+                max_value=500,
+                value=st.session_state["max_words"],
+                step=10,
+                help="Drag to set how long the generated summary should be (approximate word count).",
+                key="slider_doc",
+            )
+
             if st.button("Generate Document Summary"):
                 with st.spinner("Generating summary..."):
-                    doc_summary, doc_text = DocInference(doc)
+                    doc_summary, doc_text = DocInference(doc, st.session_state["max_words"])
                     st.session_state["summary"] = doc_summary
                     st.session_state["source_text"] = doc_text
 
@@ -71,7 +94,7 @@ def main():
         st.write(st.session_state["summary"])
         
         st.divider()
-        st.subheader("Ask a Question")
+        st.subheader("Ask a Follow-up Question")
         st.write("You can ask questions about the text or document you provided.")
         
         question = st.text_input("Enter your question here:")
