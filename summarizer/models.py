@@ -12,8 +12,8 @@ def load_summarizer():
     and persists across Streamlit reruns.
     """
     print("Loading summarizer model...")
-    tokenizer = AutoTokenizer.from_pretrained("t5-small")
-    model = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
+    tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
+    model = AutoModelForSeq2SeqLM.from_pretrained("facebook/bart-large-cnn")
     
     # Use GPU if available
     device = "cuda" if torch.cuda.is_available() else "cpu"

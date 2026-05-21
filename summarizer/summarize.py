@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 import streamlit as st
 from .extract import extract_text_from_file
 from .preprocess import chunk_text
@@ -27,19 +28,26 @@ def process_and_summarize_text(text: str, max_words: int = 150) -> str:
     # 4. Summarize chunks
     summarized_chunks = []
     for chunk in chunks:
-        # t5 models perform best with the 'summarize: ' prefix
-        input_text = "summarize: " + chunk
+        # BART doesn't need a task prefix
+        input_text = chunk
         
         try:
-            inputs = tokenizer(input_text, return_tensors="pt", max_length=512, truncation=True).to(device)
+            inputs = tokenizer(input_text, return_tensors="pt", max_length=1024, truncation=True).to(device)
             
             outputs = model.generate(
                 **inputs, 
                 max_new_tokens=per_chunk_max, 
                 min_new_tokens=per_chunk_min, 
-                do_sample=False
+                num_beams=4,
+                length_penalty=2.0,
+                no_repeat_ngram_size=3,
+                early_stopping=True
             )
             summary = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            if summary and summary[-1] not in ".!?":
+                last_punctuation = max(summary.rfind('.'), summary.rfind('!'), summary.rfind('?'))
+                if last_punctuation != -1:
+                    summary = summary[:last_punctuation+1]
             summarized_chunks.append(summary)
         except Exception as e:
             print(f"Error summarizing chunk: {e}")

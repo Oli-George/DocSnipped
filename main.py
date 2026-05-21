@@ -1,4 +1,6 @@
+# pyrefly: ignore [missing-import]
 import streamlit as st
+import re
 from summarizer.summarize import process_and_summarize_text, process_and_summarize_doc
 from summarizer.qa import answer_question
 
@@ -11,6 +13,11 @@ if "current_choice" not in st.session_state:
     st.session_state["current_choice"] = None
 if "max_words" not in st.session_state:
     st.session_state["max_words"] = 150
+
+def capitalize_sentences(text):
+    if not text:
+        return text
+    return re.sub(r'(^|[.!?]\s+)([a-z])', lambda m: m.group(1) + m.group(2).upper(), text)
 
 def TextInference(snippet, max_words):
     return process_and_summarize_text(snippet, max_words=max_words)
@@ -102,6 +109,8 @@ def main():
             if question:
                 with st.spinner("Searching for the answer..."):
                     answer = answer_question(question, st.session_state["source_text"])
+                    if answer:
+                        answer = capitalize_sentences(answer)
                     st.write("**Answer:**")
                     st.write(answer)
             else:
