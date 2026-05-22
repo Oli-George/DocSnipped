@@ -1,0 +1,9 @@
+Features to add (As per Gemini):
+
+Sentiment score (Competition requirement, most important)
+
+Loading bar for very lage PDFs
+
+Upgrading the Q&A process to using an actual RAG (Might do this after the competition).
+
+Have to add a little more to the frontend too, it looks a little too bland.

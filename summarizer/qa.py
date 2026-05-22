@@ -10,8 +10,10 @@ def answer_question(question: str, context: str) -> str:
     Using @st.cache_data makes repeated identical questions instant.
     For first-time speed, we batch the chunks and run them in parallel on GPU/CPU.
     """
+
     if not context or not context.strip():
         return "No context provided to answer the question."
+    
     if not question or not question.strip():
         return "Please ask a question."
         
