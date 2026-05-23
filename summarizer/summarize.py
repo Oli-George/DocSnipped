@@ -4,11 +4,13 @@ from .extract import extract_text_from_file
 from .preprocess import chunk_text
 from .models import load_summarizer
 
-@st.cache_data
-def process_and_summarize_text(text: str, max_words: int = 150) -> str:
+@st.cache_data(show_spinner=False)
+def process_and_summarize_text(text: str, max_words: int = 150, _progress_callback=None) -> str:
     """
     Chunks the input text, summarizes each chunk, and concatenates the results.
     max_words controls the approximate target length of the final summary in words.
+    _progress_callback: Optional callable(current, total) for progress updates.
+                        Prefixed with _ so Streamlit's cache ignores it.
     """
     if not text or not text.strip():
         return "No text provided to summarize."
@@ -27,7 +29,7 @@ def process_and_summarize_text(text: str, max_words: int = 150) -> str:
 
     # 4. Summarize chunks
     summarized_chunks = []
-    for chunk in chunks:
+    for i, chunk in enumerate(chunks):
         # BART doesn't need a task prefix
         input_text = chunk
         
@@ -51,6 +53,9 @@ def process_and_summarize_text(text: str, max_words: int = 150) -> str:
             summarized_chunks.append(summary)
         except Exception as e:
             print(f"Error summarizing chunk: {e}")
+        
+        if _progress_callback:
+            _progress_callback(i + 1, len(chunks))
             
     final_summary = " ".join(summarized_chunks)
     return final_summary
@@ -66,3 +71,37 @@ def process_and_summarize_doc(file_obj, max_words: int = 150) -> tuple[str, str]
     
     # 2. Summarize
     return process_and_summarize_text(text, max_words=max_words), text
+
+def process_and_summarize_doc_with_progress(file_obj, max_words: int = 150) -> tuple[str, str]:
+    """
+    Same as process_and_summarize_doc but drives a Streamlit progress bar
+    across both the extraction and summarization stages.
+    """
+    progress_bar = st.progress(0, text="Extracting text from document...")
+    
+    # --- Stage 1: Extraction (0% – 30% of progress bar) ---
+    def extraction_progress(current, total, stage):
+        fraction = current / total
+        # Map extraction to 0-30% of the bar
+        progress_bar.progress(
+            min(int(fraction * 30), 30),
+            text=f"Extracting text — page {current} of {total}..."
+        )
+    
+    text = extract_text_from_file(file_obj, progress_callback=extraction_progress)
+    progress_bar.progress(30, text="Text extracted. Summarizing...")
+    
+    # --- Stage 2: Summarization (30% – 100% of progress bar) ---
+    def summarization_progress(current, total):
+        fraction = current / total
+        # Map summarization to 30-100% of the bar
+        progress_bar.progress(
+            30 + min(int(fraction * 70), 70),
+            text=f"Summarizing — chunk {current} of {total}..."
+        )
+    
+    summary = process_and_summarize_text(text, max_words=max_words, _progress_callback=summarization_progress)
+    progress_bar.progress(100, text="Done!")
+    progress_bar.empty()  # Remove the progress bar once complete
+    
+    return summary, text

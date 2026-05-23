@@ -1,10 +1,11 @@
+# pyrefly: ignore [missing-import]
 import streamlit as st
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForQuestionAnswering
 from transformers import pipeline
 
 import torch
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def load_summarizer():
     """
     Loads the HuggingFace summarization model and tokenizer.
@@ -21,7 +22,7 @@ def load_summarizer():
     
     return tokenizer, model, device
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def load_qa_model():
     """
     Loads the HuggingFace question answering model.
@@ -35,3 +36,19 @@ def load_qa_model():
     model = model.to(device)
     
     return tokenizer, model, device
+
+@st.cache_resource(show_spinner=False)
+def load_sentiment_model():
+    """
+    Loads the HuggingFace sentiment analysis model.
+    Using cardiffnlp/twitter-roberta-base-sentiment-latest to support
+    Positive, Neutral, and Negative sentiments on general natural text.
+    """
+    print("Loading sentiment model...")
+    device = 0 if torch.cuda.is_available() else -1
+    sentiment_pipeline = pipeline(
+        "sentiment-analysis", 
+        model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+        device=device
+    )
+    return sentiment_pipeline

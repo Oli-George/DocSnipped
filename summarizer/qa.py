@@ -1,9 +1,10 @@
-import torch
+# pyrefly: ignore [missing-import]
 import streamlit as st
+import torch
 from .preprocess import chunk_text
 from .models import load_qa_model
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def answer_question(question: str, context: str) -> str:
     """
     Answers a question based on the provided context.
