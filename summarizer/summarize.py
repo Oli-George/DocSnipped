@@ -15,17 +15,32 @@ def process_and_summarize_text(text: str, max_words: int = 150, _progress_callba
     if not text or not text.strip():
         return "No text provided to summarize."
         
-    # 1. Chunk text (recursive character split)
-    chunks = chunk_text(text, chunk_size=1500, chunk_overlap=150)
+    # 1. Dynamically Chunk text (recursive character split)
+    # Increase chunk size to 3500 characters (approx. 600 words) so it fits in a single BART context.
+    char_limit = 3500
+    if len(text) <= char_limit:
+        # If it fits within a single model forward pass, process it as a single chunk
+        chunks = [text]
+    else:
+        # Otherwise, chunk with standard overlap
+        chunks = chunk_text(text, chunk_size=char_limit, chunk_overlap=300)
     
     # 2. Load model
     tokenizer, model, device = load_summarizer()
     
-    # 3. Convert word target to token budget and distribute across chunks.
+    # 3. Convert word target to token budget and configure generation bounds.
     #    Tokens ≈ words * 1.3 for English text.
     total_token_budget = int(max_words * 1.3)
-    per_chunk_max = max(30, total_token_budget // max(1, len(chunks)))
-    per_chunk_min = max(5, per_chunk_max // 4)
+    
+    # If single chunk, allocate full budget and enforce minimum summary length.
+    # If multiple chunks, allow each to generate a richer summary (up to 75% of budget)
+    # rather than strictly dividing it, letting the model write complete sentences.
+    if len(chunks) == 1:
+        per_chunk_max = total_token_budget
+        per_chunk_min = max(30, int(total_token_budget * 0.7))
+    else:
+        per_chunk_max = max(60, int(total_token_budget * 0.75))
+        per_chunk_min = max(20, per_chunk_max // 3)
 
     # 4. Summarize chunks
     summarized_chunks = []
@@ -40,7 +55,7 @@ def process_and_summarize_text(text: str, max_words: int = 150, _progress_callba
                 max_new_tokens=per_chunk_max, 
                 min_new_tokens=per_chunk_min, 
                 num_beams=4,
-                length_penalty=2.0,
+                length_penalty=2.5,  # Increased from 2.0 to 2.5 to encourage longer generation
                 no_repeat_ngram_size=3,
                 early_stopping=True
             )
