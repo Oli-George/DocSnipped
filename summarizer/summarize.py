@@ -30,7 +30,6 @@ def process_and_summarize_text(text: str, max_words: int = 150, _progress_callba
     # 4. Summarize chunks
     summarized_chunks = []
     for i, chunk in enumerate(chunks):
-        # BART doesn't need a task prefix
         input_text = chunk
         
         try:

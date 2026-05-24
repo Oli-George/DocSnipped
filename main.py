@@ -438,8 +438,136 @@ def main():
     # ── Results section ───────────────────────────────────────────────────────
     if st.session_state["summary"]:
         st.divider()
-        st.subheader("Summary")
+        
+        # Conditionally render copy widget at the top-right of the summary section for Paste Text mode
+        if choice_index == 1:
+            col_hdr, col_copy = st.columns([5, 1])
+            with col_hdr:
+                st.subheader("Summary")
+            with col_copy:
+                # pyrefly: ignore [missing-import]
+                import streamlit.components.v1 as components
+                copy_text_escaped = st.session_state["summary"].replace("'", "\\'").replace("\n", "\\n")
+                icon_color = "#7C6FCD" if is_dark else "#4338ca"
+                bg_color = "#1A1D27" if is_dark else "#ffffff"
+                border_color = "#2d2f45" if is_dark else "#e2e8f0"
+                hover_bg = "#2d2f45" if is_dark else "#f3f4f6"
+                
+                html_code = f"""
+                <div style="display: flex; justify-content: flex-end; align-items: center; height: 38px;">
+                    <button id="copy-btn" onclick="copyToClipboard()" style="
+                        background-color: {bg_color};
+                        border: 1px solid {border_color};
+                        border-radius: 6px;
+                        width: 100px;
+                        height: 32px;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 11.5px;
+                        font-weight: 600;
+                        color: {icon_color};
+                        transition: all 0.2s ease;
+                        padding: 0 8px;
+                        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                    ">
+                        <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{icon_color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span id="btn-text">Copy</span>
+                    </button>
+                </div>
+                <script>
+                    function copyToClipboard() {{
+                        const text = `{copy_text_escaped}`;
+                        navigator.clipboard.writeText(text).then(() => {{
+                            const btn = document.getElementById('copy-btn');
+                            const icon = document.getElementById('copy-icon');
+                            const txt = document.getElementById('btn-text');
+                            
+                            btn.style.borderColor = '#16a34a';
+                            btn.style.color = '#16a34a';
+                            txt.textContent = 'Copied!';
+                            icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                            icon.setAttribute('stroke', '#16a34a');
+                            
+                            setTimeout(() => {{
+                                btn.style.borderColor = '{border_color}';
+                                btn.style.color = '{icon_color}';
+                                txt.textContent = 'Copy';
+                                icon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+                                icon.setAttribute('stroke', '{icon_color}');
+                            }}, 2000);
+                        }}).catch(err => {{
+                            console.error('Failed to copy: ', err);
+                        }});
+                    }}
+                    const btn = document.getElementById('copy-btn');
+                    btn.addEventListener('mouseover', () => {{
+                        if (btn.style.borderColor !== 'rgb(22, 163, 74)') {{
+                            btn.style.backgroundColor = '{hover_bg}';
+                        }}
+                    }});
+                    btn.addEventListener('mouseout', () => {{
+                        btn.style.backgroundColor = '{bg_color}';
+                    }});
+                </script>
+                """
+                components.html(html_code, height=38, scrolling=False)
+        else:
+            st.subheader("Summary")
+            
         st.write(st.session_state["summary"])
+
+        # Show optional "Download Document" (PDF, DOCX, TXT options) below the summary for Upload Document mode
+        if choice_index == 2:
+            st.write("")  # spacing
+            st.markdown("<p style='font-size:0.9rem; font-weight:600; margin-bottom: 0.5rem;'>Download Document Summary</p>", unsafe_allow_html=True)
+            
+            from summarizer.export import generate_txt_report, generate_docx_report, generate_pdf_report
+            
+            summary_txt = st.session_state["summary"]
+            sent_lbl = st.session_state["sentiment_label"] or "NEUTRAL"
+            sent_scr = st.session_state["sentiment_score"] or 0.0
+            
+            col_pdf, col_docx, col_txt = st.columns(3)
+            
+            with col_pdf:
+                pdf_data = generate_pdf_report(summary_txt, sent_lbl, sent_scr, "Uploaded Document")
+                st.download_button(
+                    label="📄 Download PDF",
+                    data=pdf_data,
+                    file_name="doc_summary.pdf",
+                    mime="application/pdf",
+                    key="dl_pdf",
+                    use_container_width=True
+                )
+                
+            with col_docx:
+                docx_data = generate_docx_report(summary_txt, sent_lbl, sent_scr, "Uploaded Document")
+                st.download_button(
+                    label="📝 Download DOCX",
+                    data=docx_data,
+                    file_name="doc_summary.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    key="dl_docx",
+                    use_container_width=True
+                )
+                
+            with col_txt:
+                txt_data = generate_txt_report(summary_txt, sent_lbl, sent_scr, "Uploaded Document")
+                st.download_button(
+                    label="📄 Download TXT",
+                    data=txt_data,
+                    file_name="doc_summary.txt",
+                    mime="text/plain",
+                    key="dl_txt",
+                    use_container_width=True
+                )
 
         if st.session_state["sentiment_label"] is None:
             with st.spinner("Analyzing sentiment..."):

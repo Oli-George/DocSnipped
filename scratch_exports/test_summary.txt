@@ -1,0 +1,17 @@
+==================================================
+DOCSNIPPED SUMMARY REPORT
+==================================================
+Processed on:   May 24, 2026 at 08:28 PM
+Source Type:    Uploaded Document (PDF)
+Summary Length: 52 words
+--------------------------------------------------
+
+GENERATED SUMMARY:
+DocSnipped is an advanced AI-powered text and document summarization application. It supports uploading PDF, DOCX, and TXT files, automatically parses content using robust Python libraries, and distills large bodies of text into clean, structured executive summaries. It also executes sentiment analysis using a deep learning Roberta model and handles follow-up context-driven Q&A.
+
+--------------------------------------------------
+ANALYSIS INSIGHTS:
+Sentiment:      POSITIVE
+Confidence:     98%
+
+==================================================
