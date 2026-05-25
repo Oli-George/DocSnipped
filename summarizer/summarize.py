@@ -34,7 +34,7 @@ def process_and_summarize_text(text: str, max_words: int = 150, _progress_callba
     
     # If single chunk, allocate full budget and enforce minimum summary length.
     # If multiple chunks, allow each to generate a richer summary (up to 75% of budget)
-    # rather than strictly dividing it, letting the model write complete sentences.
+    
     if len(chunks) == 1:
         per_chunk_max = total_token_budget
         per_chunk_min = max(30, int(total_token_budget * 0.7))
@@ -74,17 +74,6 @@ def process_and_summarize_text(text: str, max_words: int = 150, _progress_callba
     final_summary = " ".join(summarized_chunks)
     return final_summary
 
-def process_and_summarize_doc(file_obj, max_words: int = 150) -> tuple[str, str]:
-    """
-    Extracts text from a document and summarizes it.
-    Returns a tuple of (summary, extracted_text).
-    max_words controls the approximate target length of the final summary in words.
-    """
-    # 1. Extract text from uploaded file
-    text = extract_text_from_file(file_obj)
-    
-    # 2. Summarize
-    return process_and_summarize_text(text, max_words=max_words), text
 
 def process_and_summarize_doc_with_progress(file_obj, max_words: int = 150) -> tuple[str, str]:
     """

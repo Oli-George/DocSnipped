@@ -2,9 +2,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-# pyrefly: ignore [missing-import]
 import docx
-# pyrefly: ignore [missing-import]
 from docx.shared import Inches, Pt, RGBColor
 from datetime import datetime
 import io
@@ -47,8 +45,8 @@ def generate_docx_report(summary_text: str, sentiment_label: str, sentiment_scor
         
     # Styling colors
     color_primary = RGBColor(124, 111, 205)  # #7C6FCD
-    color_dark = RGBColor(30, 27, 75)       # #1e1b4b
-    color_muted = RGBColor(75, 85, 99)      # #4b5563
+    color_dark = RGBColor(30, 27, 75)        # #1e1b4b
+    color_muted = RGBColor(75, 85, 99)       # #4b5563
     
     # Title
     title_p = doc.add_paragraph()

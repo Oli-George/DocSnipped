@@ -27,7 +27,7 @@ def answer_question(question: str, context: str) -> str:
         return "Sorry, I couldn't find a confident answer to that question in the document."
         
     best_answer = None
-    best_score = -float('inf')
+    best_score = float('-inf')
     
     try:
         # Batch all chunks together so they run in parallel in a single forward pass

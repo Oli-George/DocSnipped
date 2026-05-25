@@ -1,7 +1,7 @@
 # pyrefly: ignore [missing-import]
 import streamlit as st
 import re
-from summarizer.summarize import process_and_summarize_text, process_and_summarize_doc, process_and_summarize_doc_with_progress
+from summarizer.summarize import process_and_summarize_text, process_and_summarize_doc_with_progress
 from summarizer.qa import answer_question
 from summarizer.models import load_sentiment_model
 
@@ -345,10 +345,6 @@ def main():
     # Inject theme CSS first
     _inject_theme(tokens)
 
-    # ── Toggle button ─────────────────────────────────────────────────────────
-    # Rendered FIRST as the only button in a [spacer | toggle] column row.
-    # CSS targets it via [stHorizontalBlock]:first-of-type [column]:last-child button
-    # The label is a non-breaking space; the SVG appears via CSS background-image.
     col_spacer, col_toggle = st.columns([10, 1])
     with col_toggle:
         # Marker used by CSS :has(#ds-toggle-col) to reliably target this button
@@ -405,8 +401,7 @@ def main():
     elif choice_index == 2:
         try:
             doc = st.file_uploader(
-                "Upload your document (PDF, DOCX, or TXT)",
-                type=["pdf", "docx", "txt"],
+                "Upload your document (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"],
             )
         except Exception as e:
             st.error(f"Error uploading document: {e}")

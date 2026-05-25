@@ -1,5 +1,0 @@
-New features to add (As per Gemini):
-
-Loading bar for large PDFs.
-
-Improve PDF summary quality.

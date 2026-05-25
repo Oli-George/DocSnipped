@@ -39,4 +39,3 @@ def extract_text_from_file(file_obj, progress_callback=None) -> str:
         
     else:
         raise ValueError(f"Unsupported file format: {file_name}. Please upload a txt, pdf, or docx file.")
-
